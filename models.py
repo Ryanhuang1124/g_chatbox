@@ -8,6 +8,7 @@ class Users(Base):
     name = Column("name",String)
     account = Column("account",String)
     password = Column("password",String)
+    # date = Column("date",DateTime,default=datetime.utcnow)
 
 
 class Records(Base):
@@ -15,14 +16,12 @@ class Records(Base):
     id = Column("id",Integer,primary_key=True,index=True)
     user_id = Column("user_id",Integer,ForeignKey("users.id"))
     title = Column("title",String)
-    account = Column("account",String)
-    password = Column("password",String)
     date = Column("date",DateTime,default=datetime.utcnow)
 
 class Conversations(Base):
     __tablename__ = "conversations"
     id = Column("id",Integer,primary_key=True,index=True)
     record_id = Column("record_id",Integer,ForeignKey("records.id"))
-    assistant = Column("assistant",Boolean)
+    is_ai = Column("assistant",Boolean)
     message = Column("message",String)
     date = Column("date",DateTime,default=datetime.utcnow)

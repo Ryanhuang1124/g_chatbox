@@ -1,4 +1,3 @@
-from typing import Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel,Field
 from starlette import status
@@ -15,9 +14,9 @@ router = APIRouter(
 
 
 class RequestUsers(BaseModel):
-    name : str = Field(max_length=12)
-    account : str = Field(max_length=12) 
-    password : str = Field(max_length=12)
+    name : str = Field(max_length=16)
+    account : str = Field(max_length=16) 
+    password : str = Field(max_length=16)
     class Config:
         json_schema_extra={
 			'example':{
@@ -29,18 +28,24 @@ class RequestUsers(BaseModel):
 
 class ResponseUsers(BaseModel):
     msg : str
-    user_id : Optional[int]
+    user_name : str
+    user_id : int
+
+class ResponseUsersList(BaseModel):
+    msg : str
+    user_list : list
+    count : int
 
 
-@router.get("/",status_code=status.HTTP_200_OK)
-async def get_self(session:DB_ANNOTATED, applyer : VERIFY_TOKEN):
-    print("app:",applyer)
+@router.get("/",status_code=status.HTTP_200_OK,response_model=ResponseUsersList)
+async def get_all_user(session:DB_ANNOTATED, applyer : VERIFY_TOKEN):
 
     if applyer is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="User Unauthorized")
+    
+    data = [{'user_name': user.name, 'user_id': user.id} for user in session.query(Users).all()]
 
-    data = session.query(Users).filter(Users.id == applyer.get('id')).first()
-    return data
+    return ResponseUsersList(msg="success",count= len(data),user_list=data)
 
 
 @router.post("/register" ,status_code=status.HTTP_201_CREATED,response_model=ResponseUsers)
@@ -52,4 +57,5 @@ async def create_user(session:DB_ANNOTATED, request_data : RequestUsers):
      )
     session.add(data)
     session.commit()
-    return ResponseUsers(msg='User Created',user_id=data.id)
+    
+    return ResponseUsers(msg='User Created',user_name=data.name,user_id=data.id)
