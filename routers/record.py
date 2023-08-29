@@ -62,15 +62,19 @@ async def create_self_record(session:DB_ANNOTATED,applyer:VERIFY_TOKEN, request_
     
     return ResponseRecord(msg='Record Created',title=data.title,record_id = data.id)
 
-@router.get("/delete" ,status_code=status.HTTP_200_OK,response_model=ResponseRecord)
+@router.delete("/delete" ,status_code=status.HTTP_202_ACCEPTED,response_model=ResponseRecord)
 async def delete_record_by_id(record_id:str,session:DB_ANNOTATED,applyer:VERIFY_TOKEN):
 
     user_id = applyer.get("id")
     
     record = session.query(Records).filter(Records.id == record_id).first()
-    if record.user_id == user_id:
-        session.delete(record)
-        session.commit()
-        return ResponseRecord(msg='Record Deleted',title=record.title,record_id = record.id)
+    if record is not None:
+        if record.user_id == user_id:
+            session.delete(record)
+            session.commit()
+            return ResponseRecord(msg='Record Deleted',title=record.title,record_id = record.id)
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Unauthorized")
     else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Unauthorized")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Record Not Found")
+        
