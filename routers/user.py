@@ -50,12 +50,17 @@ async def get_all_user(session:DB_ANNOTATED, applyer : VERIFY_TOKEN):
 
 @router.post("/register" ,status_code=status.HTTP_201_CREATED,response_model=ResponseUsers)
 async def create_user(session:DB_ANNOTATED, request_data : RequestUsers):
-    data = Users( 
+    data = Users(
         name = request_data.name,
         account = request_data.account,
         password = bcrypt.hash(request_data.password)
      )
-    session.add(data)
-    session.commit()
     
-    return ResponseUsers(msg='User Created',user_name=data.name,user_id=data.id)
+    account_exists = session.query(Users).filter( Users.account == data.account ).exists()
+
+    if account_exists :
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Account already exists.")
+    else:
+        session.add(data)
+        session.commit()
+        return ResponseUsers(msg='User Created',user_name=data.name,user_id=data.id)
