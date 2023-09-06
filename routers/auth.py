@@ -50,10 +50,14 @@ class ResponseToken(BaseModel):
 @router.post("/login", status_code=status.HTTP_200_OK,response_model=ResponseToken)
 async def login_for_access_token(session : DB_ANNOTATED,body: Annotated[OAuth2PasswordRequestForm,Depends()]):
 
-    user = session.query(Users).filter(Users.account==body.username).first( )
+    user = session.query(Users).filter(Users.account==body.username).first()
     
-    if bcrypt.verify(body.password, hash = user.password ):
-        token = create_token(account=user.account, id=user.id,time_delta=timedelta(minutes=60))
-        return ResponseToken(access_token=token,token_type="bearer")
+    if user is not None:
+        if bcrypt.verify(body.password, hash = user.password ):
+            token = create_token(account=user.account, id=user.id,time_delta=timedelta(minutes=60))
+            return ResponseToken(access_token=token,token_type="bearer")
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Couldn't Validate User.")
     else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Couldn't Validate User.")
+         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User Not Found")
+
