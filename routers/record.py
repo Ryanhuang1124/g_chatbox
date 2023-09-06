@@ -45,7 +45,7 @@ class ResponseRecordsList(BaseModel):
 def get_self_records(session : DB_ANNOTATED , applyer : VERIFY_TOKEN):
     user_id = applyer.get("id")
     
-    data = [{"record_id":record.id , "title":record.title} for record in session.query(Records).filter( Records.user_id == user_id ).all()]
+    data = [{"record_id":record.id , "title":record.title,"date":record.date} for record in session.query(Records).filter( Records.user_id == user_id ).all()]
     
     return ResponseRecordsList(msg="success",record_list=data,count=len(data))
 
