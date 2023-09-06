@@ -15,7 +15,7 @@ router = APIRouter(
 
 class RequestUsers(BaseModel):
     name : str = Field(max_length=16)
-    account : str = Field(max_length=16) 
+    account : str = Field(max_length=32) 
     password : str = Field(max_length=16)
     class Config:
         json_schema_extra={
