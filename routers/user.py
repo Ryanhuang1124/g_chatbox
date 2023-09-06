@@ -55,10 +55,10 @@ async def create_user(session:DB_ANNOTATED, request_data : RequestUsers):
         account = request_data.account,
         password = bcrypt.hash(request_data.password)
      )
-    
+        
     user = session.query(Users).filter( Users.account == data.account ).first()
 
-    if user is not None :
+    if not user:
         session.add(data)
         session.commit()
         return ResponseUsers(msg='User Created',user_name=data.name,user_id=data.id)
