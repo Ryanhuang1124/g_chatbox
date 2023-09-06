@@ -60,4 +60,3 @@ async def login_for_access_token(session : DB_ANNOTATED,body: Annotated[OAuth2Pa
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Couldn't Validate User.")
     else:
          raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User Not Found")
-

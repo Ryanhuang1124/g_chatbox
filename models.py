@@ -22,6 +22,6 @@ class Conversations(Base):
     __tablename__ = "conversations"
     id = Column("id",Integer,primary_key=True,index=True)
     record_id = Column("record_id",Integer,ForeignKey("records.id"))
-    is_ai = Column("assistant",Boolean)
+    assistant = Column("assistant",Boolean)
     message = Column("message",String)
     date = Column("date",DateTime,default=datetime.utcnow)
