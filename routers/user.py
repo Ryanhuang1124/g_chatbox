@@ -56,11 +56,11 @@ async def create_user(session:DB_ANNOTATED, request_data : RequestUsers):
         password = bcrypt.hash(request_data.password)
      )
     
-    account_exists = session.query(Users).filter( Users.account == data.account ).exists()
+    user = session.query(Users).filter( Users.account == data.account ).first()
 
-    if account_exists :
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Account already exists.")
-    else:
+    if user is not None :
         session.add(data)
         session.commit()
         return ResponseUsers(msg='User Created',user_name=data.name,user_id=data.id)
+    else:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Account already exists.")
