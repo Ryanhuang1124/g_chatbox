@@ -67,7 +67,7 @@ async def create_self_record(session:DB_ANNOTATED,applyer:VERIFY_TOKEN, request_
 
 
 
-@router.patch("/edit_title",status_code=status.HTTP_202_ACCEPTED,response_model=ResponseRecord)
+@router.put("/edit_title",status_code=status.HTTP_202_ACCEPTED,response_model=ResponseRecord)
 async def edit_record_title_by_id(record_id:str,session:DB_ANNOTATED,applyer:VERIFY_TOKEN,request_data : RequestRecordTitle):
     user_id = applyer.get("id")
     record = session.query(Records).filter(Records.id == record_id).first()
