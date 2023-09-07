@@ -28,7 +28,7 @@ class RequestDeleteConversation(BaseModel):
 		}
 
 class RequestCreateConversation(BaseModel):
-    message : str = Field(max_length=50)
+    message : str = Field(max_length=200)
     record_id : int 
     assistant : bool
     class Config:
