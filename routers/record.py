@@ -20,7 +20,7 @@ class RequestDeleteRecord(BaseModel):
 			}
 		}
 
-class RequestCreateRecord(BaseModel):
+class RequestRecordTitle(BaseModel):
     title : str = Field(max_length=20) 
     class Config:
         json_schema_extra={
@@ -28,6 +28,8 @@ class RequestCreateRecord(BaseModel):
             'title':'Title Of Record'
 			}
 		}
+
+
 
 class ResponseRecord(BaseModel):
     msg : str
@@ -41,6 +43,7 @@ class ResponseRecordsList(BaseModel):
     count : int
 
 
+
 @router.get("/",status_code=status.HTTP_200_OK,response_model=ResponseRecordsList)
 def get_self_records(session : DB_ANNOTATED , applyer : VERIFY_TOKEN):
     user_id = applyer.get("id")
@@ -51,7 +54,7 @@ def get_self_records(session : DB_ANNOTATED , applyer : VERIFY_TOKEN):
 
 
 @router.post("/create" ,status_code=status.HTTP_201_CREATED,response_model=ResponseRecord)
-async def create_self_record(session:DB_ANNOTATED,applyer:VERIFY_TOKEN, request_data : RequestCreateRecord):
+async def create_self_record(session:DB_ANNOTATED,applyer:VERIFY_TOKEN, request_data : RequestRecordTitle):
     user_id = applyer.get("id")
     data = Records( 
         title = request_data.title,
@@ -61,6 +64,26 @@ async def create_self_record(session:DB_ANNOTATED,applyer:VERIFY_TOKEN, request_
     session.commit()
     
     return ResponseRecord(msg='Record Created',title=data.title,record_id = data.id)
+
+
+
+@router.patch("/edit_title",status_code=status.HTTP_202_ACCEPTED,response_model=ResponseRecord)
+async def edit_record_title_by_id(record_id:str,session:DB_ANNOTATED,applyer:VERIFY_TOKEN,request_data : RequestRecordTitle):
+    user_id = applyer.get("id")
+    record = session.query(Records).filter(Records.id == record_id).first()
+
+    if record is not None:
+        if record.user_id == user_id:
+            record.title = request_data.title
+            session.commit()
+            return ResponseRecord(msg='Record Updated',title=record.title,record_id = record.id)
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Unauthorized")
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Record Not Found")
+        
+    
+
 
 @router.delete("/delete" ,status_code=status.HTTP_202_ACCEPTED,response_model=ResponseRecord)
 async def delete_record_by_id(record_id:str,session:DB_ANNOTATED,applyer:VERIFY_TOKEN):
